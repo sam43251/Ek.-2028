@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#087f5b">
+<title>EK 2028</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f0f7f5;color:#17352d}
+header{background:linear-gradient(135deg,#087f5b,#1261a0);color:white;padding:25px 18px;border-radius:0 0 25px 25px}
+header h1{margin:0;font-size:30px}
+nav{display:flex;gap:7px;overflow:auto;padding:12px;background:white;position:sticky;top:0}
+nav button{border:0;border-radius:12px;padding:11px;background:#e5f1ed;color:#174b3c;font-weight:bold}
+nav button.active{background:#087f5b;color:white}
+main{padding:16px;max-width:650px;margin:auto}
+.card{background:white;padding:17px;margin:12px 0;border-radius:17px;box-shadow:0 3px 12px #153d3010}
+h2{color:#087f5b}
+button,input,select{font:inherit}
+.action{background:#087f5b;color:white;border:0;border-radius:10px;padding:12px}
+input,select{padding:10px;border:1px solid #b7cec5;border-radius:9px;max-width:100%}
+.small{color:#657d74;font-size:13px}
+</style>
+</head>
+<body>
+<header><h1>⚽ EK 2028</h1><p>Jouw voetbaltoernooi begint hier!</p><p>💚 Groen · 💙 Blauw · 🤍 Wit</p></header>
+<nav>
+<button onclick="show('home')">🏠 Home</button>
+<button onclick="show('matches')">📅 Wedstrijden</button>
+<button onclick="show('table')">🏆 Standen</button>
+<button onclick="show('predict')">🎯 Voorspel</button>
+<button onclick="show('teams')">🌍 Landen</button>
+<button onclick="show('scorers')">⚽ Topscorers</button>
+</nav>
+<main id="app"></main>
+<script>
+const teams=[['🇳🇱','Nederland'],['🇧🇪','België'],['🇩🇪','Duitsland'],['🇫🇷','Frankrijk'],['🇪🇸','Spanje'],['🇵🇹','Portugal'],['🇮🇹','Italië'],['🏴','Engeland'],['🇭🇷','Kroatië'],['🇩🇰','Denemarken'],['🇨🇭','Zwitserland'],['🇦🇹','Oostenrijk'],['🇸🇪','Zweden'],['🇳🇴','Noorwegen'],['🇵🇱','Polen'],['🇹🇷','Turkije'],['🇬🇷','Griekenland'],['🇨🇿','Tsjechië'],['🇺🇦','Oekraïne'],['🇷🇴','Roemenië'],['🇭🇺','Hongarije'],['🇷🇸','Servië'],['🇸🇰','Slowakije'],['🇸🇮','Slovenië'],['🇫🇮','Finland'],['🇮🇪','Ierland'],['🇮🇸','IJsland']];
+let favorite=localStorage.getItem('ekfavorite')||'Nederland';
+let predictions=JSON.parse(localStorage.getItem('ekpredictions')||'{}');
+function show(p){
+let a=document.getElementById('app'),html='';
+if(p==='home')html='<div class="card"><h2>Welkom bij EK 2028!</h2><p>Volg het toernooi en doe mee met voorspellingen.</p><p>⭐ Favoriet land: '+favorite+'</p><p class="small">Dit is een eerste prototype. Officiële wedstrijddata zijn nog niet gekoppeld.</p></div>';
+if(p==='matches')html='<div class="card"><h2>📅 Wedstrijdschema</h2><p>Het officiële schema wordt bekendgemaakt door de toernooiorganisatie.</p><p>De wedstrijden verschijnen hier zodra je betrouwbare wedstrijdgegevens toevoegt.</p></div>';
+if(p==='table')html='<div class="card"><h2>🏆 Live standen</h2><p>Er zijn nog geen live standen beschikbaar.</p><p class="small">Deze functie heeft een betrouwbare gegevensbron nodig.</p></div>';
+if(p==='predict')html='<div class="card"><h2>🎯 Voorspel de uitslag</h2><label>Thuisland<br><select id="home">'+teams.map(t=>'<option>'+t[1]+'</option>').join('')+'</select></label><p><label>Uitland<br><select id="away">'+teams.map(t=>'<option>'+t[1]+'</option>').join('')+'</select></label></p><p><label>Jouw voorspelling thuis: <input id="hscore" type="number" min="0" max="20" value="1"></label></p><p><label>Jouw voorspelling uit: <input id="ascore" type="number" min="0" max="20" value="0"></label></p><button class="action" onclick="savePrediction()">Bewaar voorspelling</button><p id="saved"></p><h3>Mijn voorspellingen</h3><div id="predlist"></div></div>';
+if(p==='teams')html='<div class="card"><h2>🌍 EK-landen</h2><label>Favoriet land<br><select id="fav">'+teams.map(t=>'<option '+(t[1]===favorite?'selected':'')+'>'+t[1]+'</option>').join('')+'</select></label> <button class="action" onclick="saveFavorite()">Bewaar favoriet</button><div id="teamlist"></div></div>';
+if(p==='scorers')html='<div class="card"><h2>⚽ Topscorers</h2><p>De topscorers verschijnen zodra wedstrijdgegevens beschikbaar zijn.</p></div>';
+a.innerHTML=html;
+if(p==='teams')document.getElementById('teamlist').innerHTML=teams.map(t=>'<p>'+t[0]+' '+t[1]+'</p>').join('');
+if(p==='predict')listPredictions();
+}
+function saveFavorite(){favorite=document.getElementById('fav').value;localStorage.setItem('ekfavorite',favorite);show('home')}
+function savePrediction(){let h=document.getElementById('home').value,a=document.getElementById('away').value;if(h===a){alert('Kies twee verschillende landen.');return}let key=Date.now();predictions[key]={h,a,hs:document.getElementById('hscore').value,as:document.getElementById('ascore').value};localStorage.setItem('ekpredictions',JSON.stringify(predictions));document.getElementById('saved').textContent='Voorspelling opgeslagen!';listPredictions()}
+function listPredictions(){let el=document.getElementById('predlist');if(el)el.innerHTML=Object.values(predictions).map(x=>'<p>'+x.h+' '+x.hs+' - '+x.as+' '+x.a+'</p>').join('')||'<p>Nog geen voorspellingen.</p>'}
+show('home');
+</script>
+</body>
+</html>
